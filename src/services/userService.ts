@@ -16,7 +16,6 @@ const createNew = async (reqBody: createUser) => {
     user_name: reqBody.user_name,
     user_email: reqBody.user_email
   })
-  console.log("service: ", newUser)
   return newUser
 }
 
