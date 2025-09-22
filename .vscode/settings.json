@@ -1,0 +1,16 @@
+{
+  "sqltools.connections": [
+    {
+      "ssh": "Disabled",
+      "previewLimit": 50,
+      "server": "localhost",
+      "port": 5432,
+      "driver": "PostgreSQL",
+      "name": "RinStore Local",
+      "database": "rinstoredb",
+      "username": "ryan_2005",
+      "password": "150805",
+      "connectionTimeout": 30
+    }
+  ]
+}

@@ -1,0 +1,33 @@
+{
+  "name": "rinstore-backend",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "repository": "https://github.com/chivinh123abc/RinStore-BE.git",
+  "author": "Ryan Luong <mail.lcvinh@gmail.com>",
+  "license": "MIT",
+  "scripts": {
+    "dev": "nodemon --watch src --exec ts-node -r tsconfig-paths/register src/server.ts",
+    "build": "tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.2",
+    "eslint": "^9.36.0",
+    "express": "^5.1.0",
+    "globals": "^16.4.0",
+    "http-status-codes": "^2.3.0",
+    "nodemon": "^2.0.18",
+    "pg": "^8.16.3",
+    "typescript-eslint": "^8.44.0"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.36.0",
+    "@types/cors": "^2.8.19",
+    "@types/eslint": "^9.6.1",
+    "@types/express": "^5.0.3",
+    "@types/pg": "^8.15.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.9.2"
+  }
+}
