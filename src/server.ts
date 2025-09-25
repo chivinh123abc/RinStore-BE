@@ -29,6 +29,7 @@ const START_SERVER = () => {
   asyncExitHook(async () => {
     console.log('[SERVER]: Server is shutting down');
     pool.end();
+    console.log('')
   }, {
     wait: 300
   });
