@@ -58,7 +58,9 @@ export default [
       }
     },
     rules: {
-      semi: "off",
+      semi: ['error', 'never'],
+      'no-extra-semi': 'error',
+      quotes: ['error', 'single'],
       "prefer-const": "error",
       "import/no-dynamic-require": 0,
       "no-else-return": "off",
