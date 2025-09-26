@@ -1,7 +1,7 @@
 import { Response, Request, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import { env } from '../configs/environment.js'
-import ApiError from '../configs/utils/ApiError.js'
+import ApiError from '../utils/ApiError.js'
 
 
 export const errorHandlingMiddleware = (err: ApiError, req: Request, res: Response, next: NextFunction) => {

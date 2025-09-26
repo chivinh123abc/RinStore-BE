@@ -1,80 +1,105 @@
 import { pool } from '../configs/database.js'
 
+export interface userNoId {
+  username?: string,
+  email?: string
+  password?: string,
+  phone_number?: string,
+  avatar?: string,
+  is_active?: boolean,
+  verifyToken?: string
+}
+
 export interface user {
   user_id: number,
-  user_name: string,
-  user_email: string
+  username: string,
+  email: string,
+  password: string,
+  phone_number?: string,
+  avatar?: string,
+  is_active?: boolean
+  verifyToken?: string
 }
 
-interface userNoId_noStrict {
-  user_name?: string,
-  user_email?: string
-}
-
-interface userNoId {
-  user_name: string,
-  user_email: string
-}
-
-const create = async (user_name: string, user_email: string): Promise<user> => {
+// CREATE da xong
+const create = async ({ username, email, password, phone_number, avatar, verifyToken }: userNoId): Promise<user> => {
   const result = await pool.query(
     `
-      INSERT INTO users (user_name, user_email)
-      VALUES ($1, $2)
-      RETURNING user_id, user_name, user_email
+      INSERT INTO users (username, email, password, phone_number, avatar, verifyToken)
+      VALUES ($1, $2, $3, $4, $5, $6)
+      RETURNING user_id, username, email, phone_number, avatar, created_at
     `,
-    [user_name, user_email]
+    [username, email, password, phone_number, avatar, verifyToken]
   )
   return result.rows[0]
 }
 
-const findUserId = async (user_id: number): Promise<user | null> => {
+//Ham nay ok
+const findUserByEmail = async (email: string): Promise<user | null> => {
   const result = await pool.query(
     `
-      SELECT user_id, user_name, user_email
+    SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
+    FROM users
+    WHERE email = $1 AND is_destroy = false
+    `, [email]
+  )
+  return result.rows[0] || null
+}
+
+//Ham nay ok not
+const findUserById = async (user_id: number): Promise<user | null> => {
+  const result = await pool.query(
+    `
+      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
       FROM users
-      WHERE user_id = $1
+      WHERE user_id = $1 AND is_destroy = false
     `,
     [user_id]
   )
   return result.rows[0] || null
 }
 
-const update = async (user_id: number, updatedData: userNoId_noStrict): Promise<user | null> => {
-  const fields: string[] = []
-  const values: any[] = []
-  let index = 1
+const update = async (user_id: number, reqBody: userNoId): Promise<user | null> => {
+  const updatedEntries = Object.entries(reqBody).filter(([_, v]) => v !== undefined)
 
-  if (updatedData.user_name !== undefined) {
-    fields.push(`user_name = $${index++}`)
-    values.push(updatedData.user_name)
-  }
-
-  if (updatedData.user_email !== undefined) {
-    fields.push(`user_email = $${index++}`)
-    values.push(updatedData.user_email)
-  }
-
-  if (fields.length === 0) {
+  if (updatedEntries.length === 0) {
     return null
   }
 
+  const fields = updatedEntries.map(([key], index) => `${key} = $${index + 1}`)
+  const values = updatedEntries.map(([_, value]) => value)
+
+  fields.push(`updated_at = NOW()`)
+
   values.push(user_id)
 
-  const query = `
-  UPDATE users
-  SET ${fields.join(', ')}
-  WHERE user_id = $${index}
-  RETURNING user_id, user_name, user_email
-  `
-
-  const result = await pool.query(query, values)
-
+  const queryData = `
+    UPDATE users
+    SET ${fields.join(', ')}
+    WHERE user_id = $${updatedEntries.length + 1}
+    RETURNING user_id, username, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
+    `
+  const result = await pool.query(queryData, values)
   return result.rows[0] || null
+}
+
+const softDelete = async (user_id: number) => {
+  const result = await pool.query(
+    `
+    UPDATE users
+    SET is_destroy = $1
+    WHERE user_id = $2
+    RETURNING user_id, is_destroy
+    `, [true, user_id]
+  )
+
+  return result.rows[0] || false
 }
 
 export const userModel = {
   create,
-  findUserId,
-  update
+  findUserById,
+  findUserByEmail,
+  update,
+  softDelete
 }
