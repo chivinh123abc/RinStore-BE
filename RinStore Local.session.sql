@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
   avatar TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP,
-  verifyToken VARCHAR(255),
+  verify_token VARCHAR(255),
   is_active BOOLEAN DEFAULT false,
   is_destroy BOOLEAN DEFAULT false
 );

@@ -1,35 +1,15 @@
 import { pool } from '../configs/database.js'
-
-export interface userNoId {
-  username?: string,
-  email?: string
-  password?: string,
-  phone_number?: string,
-  avatar?: string,
-  is_active?: boolean,
-  verifyToken?: string
-}
-
-export interface user {
-  user_id: number,
-  username: string,
-  email: string,
-  password: string,
-  phone_number?: string,
-  avatar?: string,
-  is_active?: boolean
-  verifyToken?: string
-}
+import { user } from '../types/user.js'
 
 // CREATE da xong
-const create = async ({ username, email, password, phone_number, avatar, verifyToken }: userNoId): Promise<user> => {
+const create = async (reqBody: user): Promise<user> => {
   const result = await pool.query(
     `
-      INSERT INTO users (username, email, password, phone_number, avatar, verifyToken)
+      INSERT INTO users (username, email, password, phone_number, avatar, verify_token)
       VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING user_id, username, email, phone_number, avatar, created_at
     `,
-    [username, email, password, phone_number, avatar, verifyToken]
+    [reqBody.username, reqBody.email, reqBody.password, reqBody.phone_number, reqBody.avatar, reqBody.verify_token]
   )
   return result.rows[0]
 }
@@ -38,7 +18,7 @@ const create = async ({ username, email, password, phone_number, avatar, verifyT
 const findUserByEmail = async (email: string): Promise<user | null> => {
   const result = await pool.query(
     `
-    SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
+    SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
     FROM users
     WHERE email = $1 AND is_destroy = false
     `, [email]
@@ -50,7 +30,7 @@ const findUserByEmail = async (email: string): Promise<user | null> => {
 const findUserById = async (user_id: number): Promise<user | null> => {
   const result = await pool.query(
     `
-      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
+      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
       FROM users
       WHERE user_id = $1 AND is_destroy = false
     `,
@@ -59,7 +39,7 @@ const findUserById = async (user_id: number): Promise<user | null> => {
   return result.rows[0] || null
 }
 
-const update = async (user_id: number, reqBody: userNoId): Promise<user | null> => {
+const update = async (user_id: number, reqBody: user): Promise<user | null> => {
   const updatedEntries = Object.entries(reqBody).filter(([_, v]) => v !== undefined)
 
   if (updatedEntries.length === 0) {
@@ -69,7 +49,7 @@ const update = async (user_id: number, reqBody: userNoId): Promise<user | null> 
   const fields = updatedEntries.map(([key], index) => `${key} = $${index + 1}`)
   const values = updatedEntries.map(([_, value]) => value)
 
-  fields.push(`updated_at = NOW()`)
+  fields.push('updated_at = NOW()')
 
   values.push(user_id)
 
@@ -77,7 +57,7 @@ const update = async (user_id: number, reqBody: userNoId): Promise<user | null> 
     UPDATE users
     SET ${fields.join(', ')}
     WHERE user_id = $${updatedEntries.length + 1}
-    RETURNING user_id, username, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verifyToken
+    RETURNING user_id, username, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
     `
   const result = await pool.query(queryData, values)
   return result.rows[0] || null

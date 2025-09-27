@@ -1,10 +1,9 @@
-import jwt, { SignOptions } from 'jsonwebtoken'
-import type { StringValue } from "ms"
-import { user } from '../users/user.model.js'
+import jwt, { JwtPayload, SignOptions } from 'jsonwebtoken'
+import type { StringValue } from 'ms'
+import { user } from '../types/user.js'
 
 const generateTokens = async (userInfo: user, secretSignature: string, tokenLife: StringValue | number): Promise<string> => {
   try {
-
     const generateUser = {
       user_id: userInfo.user_id,
       email: userInfo.email
@@ -17,15 +16,15 @@ const generateTokens = async (userInfo: user, secretSignature: string, tokenLife
 
     return jwt.sign(generateUser, secretSignature, options)
   } catch (error) {
-    throw new Error("Generate Token Failed")
+    throw error
   }
 }
 
-const verifyTokens = async (token: string, secretSignature: string) => {
+const verifyTokens = async (token: string, secretSignature: string): Promise<JwtPayload> => {
   try {
-    jwt.verify(token, secretSignature)
+    return jwt.verify(token, secretSignature) as JwtPayload
   } catch (error) {
-    throw new Error("Verify Token Failed")
+    throw error
   }
 }
 

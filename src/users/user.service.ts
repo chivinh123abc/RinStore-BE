@@ -1,14 +1,13 @@
-import { StatusCodes } from 'http-status-codes'
-import ApiError from '../utils/ApiError.js'
-import { user, userModel } from './user.model.js'
 import bcrypt from 'bcrypt'
-import { v7 as uuidv7 } from 'uuid';
-import { userNoId } from './user.model.js'
-import { JwtProvider } from '../providers/JwtProvider.js';
-import { env } from '../configs/environment.js';
-import e from 'express';
+import { StatusCodes } from 'http-status-codes'
+import { v7 as uuidv7 } from 'uuid'
+import { env } from '../configs/environment.js'
+import { JwtProvider } from '../providers/JwtProvider.js'
+import { user } from '../types/user.js'
+import ApiError from '../utils/ApiError.js'
+import { userModel } from './user.model.js'
 
-const createNew = async (reqBody: userNoId) => {
+const createNew = async (reqBody: user) => {
   try {
     if (!reqBody.email || !reqBody.password || !reqBody.username) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Email and password are required')
@@ -25,7 +24,7 @@ const createNew = async (reqBody: userNoId) => {
       phone_number: reqBody.phone_number,
       avatar: reqBody.avatar,
       password: bcrypt.hashSync(reqBody.password, 8),
-      verifyToken: uuidv7()
+      verify_token: uuidv7()
     }
 
     const createdUser = await userModel.create(newUser)
@@ -46,14 +45,13 @@ const getUser = async (reqBody: { user_id: number }) => {
     }
 
     return userData
-
   } catch (error) {
     throw (error)
   }
 
 }
 
-const update = async (user_id: number, reqBody: userNoId) => {
+const update = async (user_id: number, reqBody: user) => {
 
   try {
     const existUser = userModel.findUserById(user_id)
@@ -72,7 +70,6 @@ const update = async (user_id: number, reqBody: userNoId) => {
     const updatedUser = await userModel.update(user_id, updateData)
 
     return updatedUser
-
   } catch (error) {
     throw (error)
   }
@@ -104,7 +101,9 @@ const login = async (email: string, password: string) => {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Account is not active')
     }
 
-    if (!bcrypt.compareSync(password, existUser.password)) {
+    const currentPassword = existUser.password as string
+
+    if (!bcrypt.compareSync(password, currentPassword)) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Password is not correct')
     }
 
@@ -115,7 +114,63 @@ const login = async (email: string, password: string) => {
   } catch (error) {
     throw (error)
   }
+}
 
+const verifyAccount = async (reqBody: user) => {
+  try {
+    if (!reqBody.email) {
+      throw new ApiError(StatusCodes.BAD_REQUEST, 'Email are required')
+    }
+
+    const existUser = await userModel.findUserByEmail(reqBody.email)
+    if (!existUser) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'User not exist')
+    }
+    if (existUser.is_active) {
+      throw new ApiError(StatusCodes.CONFLICT, 'User has been activated')
+    }
+
+    if (reqBody.verify_token !== existUser.verify_token) {
+      throw new ApiError(StatusCodes.CONFLICT, 'Verify Failed')
+    }
+
+    const verifiedData = {
+      verify_token: null,
+      is_active: true
+    }
+
+    const existUserId = existUser.user_id as number
+
+    const updatedData = await userModel.update(existUserId, verifiedData)
+
+    return updatedData
+  } catch (error) {
+    throw error
+  }
+}
+
+const refreshToken = async (clientRefreshToken: string) => {
+  try {
+    const refreshTokenDecoded = await JwtProvider.verifyTokens(
+      clientRefreshToken,
+      env.REFRESH_TOKEN_SECRET_SIGNATURE
+    )
+
+    const userInfo = {
+      user_id: refreshTokenDecoded.user_id as number,
+      email: refreshTokenDecoded.email as string
+    }
+
+    const accessToken = await JwtProvider.generateTokens(
+      userInfo,
+      env.ACCESS_TOKEN_SECRET_SIGNATURE,
+      env.ACCESS_TOKEN_LIFE
+    )
+
+    return { accessToken }
+  } catch (error) {
+    throw (error)
+  }
 }
 
 export const userService = {
@@ -123,5 +178,7 @@ export const userService = {
   getUser,
   update,
   softDelete,
-  login
+  login,
+  refreshToken,
+  verifyAccount
 }

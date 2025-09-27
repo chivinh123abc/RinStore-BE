@@ -1,5 +1,6 @@
-import { env } from './environment.js'
+/* eslint-disable no-console */
 import { Pool } from 'pg'
+import { env } from './environment.js'
 
 export const pool = new Pool({
   host: env.DB_HOST,
@@ -10,10 +11,10 @@ export const pool = new Pool({
 }
 )
 
-pool.on("connect", () => {
+pool.on('connect', () => {
   console.log('✅ Connected to PostgreSQL')
 })
 
-pool.on("error", (err) => {
+pool.on('error', (err) => {
   console.error('❌ PostgreSQL error:', err)
 })
