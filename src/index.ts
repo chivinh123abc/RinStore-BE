@@ -1,5 +1,6 @@
-import { Server } from './server.js'
+/* eslint-disable no-console */
 import { pool } from './configs/database.js'
+import { Server } from './server.js'
 
 (async () => {
   try {
