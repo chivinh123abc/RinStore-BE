@@ -5,6 +5,7 @@ CREATE TABLE IF NOT EXISTS users (
   email VARCHAR(255) UNIQUE NOT NULL,
   password VARCHAR(255) NOT NULL,
   phone_number VARCHAR(20),
+  role SMALLINT DEFAULT(0),
   status SMALLINT DEFAULT(0),
   avatar TEXT,
   created_at TIMESTAMP DEFAULT NOW(),
