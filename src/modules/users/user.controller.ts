@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import ms from 'ms'
-import ApiError from '../utils/ApiError.js'
+import ApiError from '../../utils/ApiError.js'
 import { userService } from './user.service.js'
 
 const createNew = async (req: Request, res: Response, next: NextFunction) => {

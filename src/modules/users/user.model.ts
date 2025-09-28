@@ -1,4 +1,4 @@
-import { pool } from '../configs/database.js'
+import { pool } from '../../configs/database.js'
 import { user } from '../types/user.js'
 
 // CREATE da xong

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
-import ApiError from '../utils/ApiError.js'
+import ApiError from '../../utils/ApiError.js'
 import { categoryService } from './category.service.js'
 
 const createNew = async (req: Request, res: Response, next: NextFunction) => {

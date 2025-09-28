@@ -1,4 +1,4 @@
-import { pool } from '../configs/database.js'
+import { pool } from '../../configs/database.js'
 import { category } from '../types/categories.js'
 
 const create = async (reqBody: category) => {
@@ -6,7 +6,7 @@ const create = async (reqBody: category) => {
     `
       INSERT INTO categories (category_name, category_slug)
       VALUES ($1, $2)
-      RETURNING category_id, category_name, category_slug
+      RETURNING category_id, category_name, category_slug, created_at, updated_at
     `,
     [reqBody.category_name, reqBody.category_slug]
   )
@@ -48,12 +48,14 @@ const update = async (category_id: number, reqBody: category) => {
   const fields = updatedEntries.map(([key, _], index) => `${key} = $${index + 1}`)
   const values = updatedEntries.map(([_, value]) => value)
 
+  fields.push('updated_at = NOW()')
   values.push(category_id)
+
   const queryData = `
     UPDATE categories
     SET ${fields.join(', ')}
     WHERE category_id = $${updatedEntries.length + 1}
-    RETURNING category_id, category_name, category_slug
+    RETURNING category_id, category_name, category_slug, created_at, updated_at
   `
 
   const result = await pool.query(queryData, values)
