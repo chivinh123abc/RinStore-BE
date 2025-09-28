@@ -28,4 +28,14 @@ CREATE TABLE IF NOT EXISTS products(
   category_id INT NOT NULL REFERENCES categories(category_id) ON DELETE RESTRICT,
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP
+);
+CREATE TABLE IF NOT EXISTS product_items(
+  product_item_id SERIAL PRIMARY KEY,
+  product_id INT NOT NULL REFERENCES products(product_id) ON DELETE RESTRICT,
+  sku VARCHAR(255) UNIQUE,
+  stock_quantity INT,
+  product_item_image TEXT,
+  product_item_price DECIMAL(10, 2),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP
 )
