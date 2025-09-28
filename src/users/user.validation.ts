@@ -82,7 +82,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
   })
 
   try {
-    correctCondition.validateAsync(req.body, { abortEarly: false })
+    await correctCondition.validateAsync(req.body, { abortEarly: false })
+    next()
   } catch (error) {
     let errorMessage = 'Unaccepted Input'
 

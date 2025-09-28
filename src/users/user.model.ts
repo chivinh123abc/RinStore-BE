@@ -2,7 +2,7 @@ import { pool } from '../configs/database.js'
 import { user } from '../types/user.js'
 
 // CREATE da xong
-const create = async (reqBody: user): Promise<user> => {
+const create = async (reqBody: user) => {
   const result = await pool.query(
     `
       INSERT INTO users (username, email, password, phone_number, avatar, verify_token)
@@ -15,7 +15,7 @@ const create = async (reqBody: user): Promise<user> => {
 }
 
 //Ham nay ok
-const findUserByEmail = async (email: string): Promise<user | null> => {
+const findUserByEmail = async (email: string) => {
   const result = await pool.query(
     `
     SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
@@ -27,7 +27,7 @@ const findUserByEmail = async (email: string): Promise<user | null> => {
 }
 
 //Ham nay ok not
-const findUserById = async (user_id: number): Promise<user | null> => {
+const findUserById = async (user_id: number) => {
   const result = await pool.query(
     `
       SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
@@ -39,13 +39,12 @@ const findUserById = async (user_id: number): Promise<user | null> => {
   return result.rows[0] || null
 }
 
-const update = async (user_id: number, reqBody: user): Promise<user | null> => {
+const update = async (user_id: number, reqBody: user) => {
   const updatedEntries = Object.entries(reqBody).filter(([_, v]) => v !== undefined)
 
   if (updatedEntries.length === 0) {
     return null
   }
-
   const fields = updatedEntries.map(([key], index) => `${key} = $${index + 1}`)
   const values = updatedEntries.map(([_, value]) => value)
 
