@@ -1,7 +1,7 @@
 import { StatusCodes } from 'http-status-codes'
+import ApiError from '../../utils/ApiError.js'
+import { slugify } from '../../utils/formatters.js'
 import { category } from '../types/categories.js'
-import ApiError from '../utils/ApiError.js'
-import { slugify } from '../utils/formatters.js'
 import { categoryModel } from './category.model.js'
 
 const createNew = async (reqBody: category) => {

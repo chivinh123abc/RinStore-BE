@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt'
 import { StatusCodes } from 'http-status-codes'
 import { v7 as uuidv7 } from 'uuid'
-import { env } from '../configs/environment.js'
-import { JwtProvider } from '../providers/JwtProvider.js'
+import { env } from '../../configs/environment.js'
+import { JwtProvider } from '../../providers/JwtProvider.js'
+import ApiError from '../../utils/ApiError.js'
 import { user } from '../types/user.js'
-import ApiError from '../utils/ApiError.js'
 import { userModel } from './user.model.js'
 
 const createNew = async (reqBody: user) => {

@@ -1,5 +1,5 @@
 import express from 'express'
-import { authMiddleware } from '../middlewares/authMiddleware.js'
+import { authMiddleware } from '../../middlewares/authMiddleware.js'
 import { categoryController } from './category.controller.js'
 import { categoryValidation } from './category.validation.js'
 

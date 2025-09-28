@@ -83,6 +83,7 @@ export default [
       'no-console': 'error',
       'no-useless-return': 'off',
       'react/display-name': 'off',
+      'eol-last': ['error', 'always'],
       'jsx-a11y/label-has-associated-control': 'off',
       'jsx-a11y/role-supports-aria-props': 'warn',
       'jsx-a11y/no-noninteractive-element-interactions': 'warn',

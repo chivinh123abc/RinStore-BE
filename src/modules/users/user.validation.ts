@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import Joi from 'joi'
-import ApiError from '../utils/ApiError.js'
+import ApiError from '../../utils/ApiError.js'
 
 export const createNew = async (req: Request, res: Response, next: NextFunction) => {
   const correctCondition = Joi.object({
