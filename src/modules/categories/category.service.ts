@@ -1,14 +1,11 @@
 import { StatusCodes } from 'http-status-codes'
 import ApiError from '../../utils/ApiError.js'
 import { slugify } from '../../utils/formatters.js'
-import { category } from '../types/categories.js'
+import { CategoryCreateDto, CategoryResponseDto, CategoryUpdateDto } from '../types/categories.js'
 import { categoryModel } from './category.model.js'
 
-const createNew = async (reqBody: category) => {
+const createNew = async (reqBody: CategoryCreateDto): Promise<CategoryResponseDto> => {
   try {
-    if (!reqBody.category_name) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'category_name not to be undefined!')
-    }
     reqBody.category_slug = slugify(reqBody.category_name)
 
     const existCategory = await categoryModel.findCategoryBySlugName(reqBody.category_slug)
@@ -25,8 +22,14 @@ const createNew = async (reqBody: category) => {
 
 }
 
-const getCategory = async (category_id: number) => {
+const getCategory = async (category_id: number): Promise<CategoryResponseDto | null> => {
   try {
+    const existCategory = await categoryModel.findCategoryById(category_id)
+
+    if (!existCategory) {
+      throw new ApiError(StatusCodes.NOT_FOUND, 'category not found')
+    }
+
     const result = await categoryModel.findCategoryById(category_id)
     return result
   } catch (error) {
@@ -34,13 +37,8 @@ const getCategory = async (category_id: number) => {
   }
 }
 
-const updateCategory = async (category_id: number, reqBody: category) => {
+const updateCategory = async (category_id: number, reqBody: CategoryUpdateDto): Promise<CategoryResponseDto | null> => {
   try {
-
-    if (!reqBody.category_name) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'category_name not to be undefined!')
-    }
-
     const existCategory = await categoryModel.findCategoryById(category_id)
 
     if (!existCategory) {

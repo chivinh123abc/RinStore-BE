@@ -4,10 +4,19 @@ import { v7 as uuidv7 } from 'uuid'
 import { env } from '../../configs/environment.js'
 import { JwtProvider } from '../../providers/JwtProvider.js'
 import ApiError from '../../utils/ApiError.js'
-import { user } from '../types/user.js'
+import { pickUser } from '../../utils/formatters.js'
+import {
+  AuthResponseDto,
+  UserEntity,
+  UserLoginDto,
+  UserRegisterDto,
+  UserResponseDto,
+  UserUpdateDto,
+  UserVerifyAccountDTO
+} from '../types/user.js'
 import { userModel } from './user.model.js'
 
-const createNew = async (reqBody: user) => {
+const createNew = async (reqBody: UserRegisterDto): Promise<UserResponseDto> => {
   try {
     if (!reqBody.email || !reqBody.password || !reqBody.username) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Email and password are required')
@@ -36,7 +45,7 @@ const createNew = async (reqBody: user) => {
   }
 }
 
-const getUser = async (reqBody: { user_id: number }) => {
+const getUser = async (reqBody: { user_id: number }): Promise<UserEntity> => {
   try {
     const userData = await userModel.findUserById(reqBody.user_id)
 
@@ -48,10 +57,9 @@ const getUser = async (reqBody: { user_id: number }) => {
   } catch (error) {
     throw (error)
   }
-
 }
 
-const update = async (user_id: number, reqBody: user) => {
+const update = async (user_id: number, reqBody: UserUpdateDto): Promise<UserResponseDto | null> => {
 
   try {
     const existUser = userModel.findUserById(user_id)
@@ -75,7 +83,7 @@ const update = async (user_id: number, reqBody: user) => {
   }
 }
 
-const softDelete = async (user_id: number) => {
+const softDelete = async (user_id: number): Promise<UserResponseDto> => {
   try {
     const existUser = await userModel.findUserById(user_id)
     if (!existUser) {
@@ -89,10 +97,9 @@ const softDelete = async (user_id: number) => {
   }
 }
 
-const login = async (email: string, password: string) => {
-
+const login = async (reqBody: UserLoginDto): Promise<AuthResponseDto> => {
   try {
-    const existUser = await userModel.findUserByEmail(email)
+    const existUser = await userModel.findUserByEmail(reqBody.email)
 
     if (!existUser) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'User is not exist')
@@ -103,20 +110,24 @@ const login = async (email: string, password: string) => {
 
     const currentPassword = existUser.password as string
 
-    if (!bcrypt.compareSync(password, currentPassword)) {
+    if (!bcrypt.compareSync(reqBody.password, currentPassword)) {
       throw new ApiError(StatusCodes.NOT_ACCEPTABLE, 'Password is not correct')
     }
 
-    const accessToken = await JwtProvider.generateTokens(existUser, env.ACCESS_TOKEN_SECRET_SIGNATURE, env.ACCESS_TOKEN_LIFE)
-    const refreshToken = await JwtProvider.generateTokens(existUser, env.REFRESH_TOKEN_SECRET_SIGNATURE, env.REFRESH_TOKEN_LIFE)
+    const access_token = await JwtProvider.generateTokens(existUser, env.ACCESS_TOKEN_SECRET_SIGNATURE, env.ACCESS_TOKEN_LIFE)
+    const refresh_token = await JwtProvider.generateTokens(existUser, env.REFRESH_TOKEN_SECRET_SIGNATURE, env.REFRESH_TOKEN_LIFE)
 
-    return { accessToken, refreshToken, ...existUser }
+    return {
+      ...pickUser(existUser),
+      access_token: access_token,
+      refresh_token: refresh_token
+    }
   } catch (error) {
     throw (error)
   }
 }
 
-const verifyAccount = async (reqBody: user) => {
+const verifyAccount = async (reqBody: UserVerifyAccountDTO) => {
   try {
     if (!reqBody.email) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'Email are required')
@@ -134,7 +145,7 @@ const verifyAccount = async (reqBody: user) => {
       throw new ApiError(StatusCodes.CONFLICT, 'Verify Failed')
     }
 
-    const verifiedData = {
+    const verifiedData: UserUpdateDto = {
       verify_token: null,
       is_active: true
     }

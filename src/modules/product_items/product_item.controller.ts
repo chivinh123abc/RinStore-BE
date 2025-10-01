@@ -22,7 +22,23 @@ const getProductItem = async (req: Request, res: Response, next: NextFunction) =
   }
 }
 
+const update = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const product_item_id = Number(req.params.product_item_id)
+    const updateData = {
+      product_item_id: product_item_id,
+      ...req.body
+    }
+
+    const gotProductItem = await productItemService.update(updateData)
+    res.status(StatusCodes.CREATED).json(gotProductItem)
+  } catch (error) {
+    next(error)
+  }
+}
+
 export const productItemController = {
   createNew,
-  getProductItem
+  getProductItem,
+  update
 }

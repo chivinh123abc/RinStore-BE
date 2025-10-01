@@ -1,7 +1,7 @@
 import { pool } from '../../configs/database.js'
-import { category } from '../types/categories.js'
+import { CategoryCreateDto, CategoryResponseDto, CategoryUpdateDto } from '../types/categories.js'
 
-const create = async (reqBody: category) => {
+const create = async (reqBody: CategoryCreateDto): Promise<CategoryResponseDto> => {
   const result = await pool.query(
     `
       INSERT INTO categories (category_name, category_slug)
@@ -14,7 +14,7 @@ const create = async (reqBody: category) => {
   return result.rows[0]
 }
 
-const findCategoryById = async (category_id: number) => {
+const findCategoryById = async (category_id: number): Promise<CategoryResponseDto | null> => {
   const result = await pool.query(
     `
     SELECT *
@@ -23,10 +23,10 @@ const findCategoryById = async (category_id: number) => {
     `,
     [category_id]
   )
-  return result.rows[0]
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
-const findCategoryBySlugName = async (category_slug: string) => {
+const findCategoryBySlugName = async (category_slug: string): Promise<CategoryResponseDto | null> => {
   const result = await pool.query(
     `
     SELECT *
@@ -35,10 +35,10 @@ const findCategoryBySlugName = async (category_slug: string) => {
     `,
     [category_slug]
   )
-  return result.rows[0]
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
-const update = async (category_id: number, reqBody: category) => {
+const update = async (category_id: number, reqBody: CategoryUpdateDto): Promise<CategoryResponseDto | null> => {
   const updatedEntries = Object.entries(reqBody).filter(([_, value]) => value !== undefined)
 
   if (updatedEntries.length === 0) {

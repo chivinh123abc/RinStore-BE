@@ -1,0 +1,78 @@
+openapi: 3.0.0
+info:
+  title: RinStore API
+  version: 1.0.0
+  description: API documentation for RinStore e-commerce
+
+servers:
+  - url: http://localhost:3000
+
+tags:
+  - name: Users
+    description: API cho quản lý user
+
+paths:
+  /users/register:
+    post:
+      summary: Đăng ký user mới
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegisterDto'
+      responses:
+        '201':
+          description: User created successfully
+        '400':
+          description: Validation error
+
+  /users/info:
+    get:
+      summary: Lấy thông tin user
+      tags: [Users]
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User info
+
+  /users/login:
+    post:
+      summary: Đăng nhập
+      tags: [Users]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserLoginDto'
+      responses:
+        '200':
+          description: Login success
+
+components:
+  schemas:
+    UserRegisterDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+        username:
+          type: string
+    UserLoginDto:
+      type: object
+      properties:
+        email:
+          type: string
+        password:
+          type: string
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

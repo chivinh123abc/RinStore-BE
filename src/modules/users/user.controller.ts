@@ -2,6 +2,7 @@ import { NextFunction, Request, Response } from 'express'
 import { StatusCodes } from 'http-status-codes'
 import ms from 'ms'
 import ApiError from '../../utils/ApiError.js'
+import { UserLoginDto } from '../types/user.js'
 import { userService } from './user.service.js'
 
 const createNew = async (req: Request, res: Response, next: NextFunction) => {
@@ -30,7 +31,6 @@ const update = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const user_id = req.jwtDecoded?.user_id
     const updateData = req.body
-
     const updatedInfo = await userService.update(user_id, updateData)
     res.status(StatusCodes.ACCEPTED).json(updatedInfo)
   } catch (error) {
@@ -56,17 +56,17 @@ const softDelete = async (req: Request, res: Response, next: NextFunction) => {
 
 const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { email, password } = req.body
-    const loginedUser = await userService.login(email, password)
+    const reqBody: UserLoginDto = req.body
+    const loginedUser = await userService.login(reqBody)
 
-    res.cookie('accessToken', loginedUser.accessToken, {
+    res.cookie('accessToken', loginedUser.access_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',
       maxAge: ms('14 days')
     })
 
-    res.cookie('refreshToken', loginedUser.refreshToken, {
+    res.cookie('refreshToken', loginedUser.refresh_token, {
       httpOnly: true,
       secure: true,
       sameSite: 'none',

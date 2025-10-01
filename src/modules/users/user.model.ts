@@ -1,8 +1,13 @@
 import { pool } from '../../configs/database.js'
-import { user } from '../types/user.js'
+import {
+  UserResponseDto,
+  UserRegisterDto,
+  UserUpdateDto,
+  UserEntity
+} from '../types/user.js'
 
 // CREATE da xong
-const create = async (reqBody: user) => {
+const create = async (reqBody: UserRegisterDto): Promise<UserResponseDto> => {
   const result = await pool.query(
     `
       INSERT INTO users (username, email, password, phone_number, avatar, verify_token)
@@ -15,31 +20,31 @@ const create = async (reqBody: user) => {
 }
 
 //Ham nay ok
-const findUserByEmail = async (email: string) => {
+const findUserByEmail = async (email: string): Promise<UserEntity | null> => {
   const result = await pool.query(
     `
-    SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
-    FROM users
-    WHERE email = $1 AND is_destroy = false
+      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_active, is_destroy
+      FROM users
+      WHERE email = $1 AND is_destroy = false
     `, [email]
   )
-  return result.rows[0] || null
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
 //Ham nay ok not
-const findUserById = async (user_id: number) => {
+const findUserById = async (user_id: number): Promise<UserEntity | null> => {
   const result = await pool.query(
     `
-      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_destroy, is_active, verify_token
+      SELECT user_id, username, password, email, phone_number, avatar, created_at, updated_at, is_active, is_destroy
       FROM users
       WHERE user_id = $1 AND is_destroy = false
     `,
     [user_id]
   )
-  return result.rows[0] || null
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
-const update = async (user_id: number, reqBody: user) => {
+const update = async (user_id: number, reqBody: UserUpdateDto): Promise<UserResponseDto | null> => {
   const updatedEntries = Object.entries(reqBody).filter(([_, v]) => v !== undefined)
 
   if (updatedEntries.length === 0) {
@@ -62,7 +67,7 @@ const update = async (user_id: number, reqBody: user) => {
   return result.rows[0] || null
 }
 
-const softDelete = async (user_id: number) => {
+const softDelete = async (user_id: number): Promise<UserResponseDto> => {
   const result = await pool.query(
     `
     UPDATE users
