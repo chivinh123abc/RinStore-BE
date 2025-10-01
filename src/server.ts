@@ -5,6 +5,7 @@ import { asyncExitHook } from 'exit-hook'
 import express from 'express'
 import { pool } from './configs/database.js'
 import { env } from './configs/environment.js'
+import { setupSwagger } from './configs/swagger.js'
 import { errorHandlingMiddleware } from './middlewares/errorHandlingMiddleware.js'
 import { APIs } from './routes/index.js'
 
@@ -15,6 +16,8 @@ const START_SERVER = () => {
   app.use(express.json())
 
   app.use(cookieParser())
+  // dung swagger UI
+  setupSwagger(app)
 
   app.use('/', APIs)
   //Xu li loi
@@ -22,6 +25,7 @@ const START_SERVER = () => {
   if (env.BUILD_MODE === 'dev') {
     app.listen(3000, () => {
       console.log('[SERVER] Server running at http://localhost:3000/')
+      console.log('Swagger docs at http://localhost:3000/api-docs')
     })
   }
   // EXIT HOOK

@@ -24,7 +24,6 @@ const isAuthorized = async (req: Request, res: Response, next: NextFunction) => 
     if (error?.message?.includes('jwt expired')) {
       next(new ApiError(StatusCodes.GONE, 'Need to refresh token'))
     }
-
     next(new ApiError(StatusCodes.UNAUTHORIZED, 'Unauthorized'))
   }
 }

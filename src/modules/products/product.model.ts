@@ -1,7 +1,7 @@
 import { pool } from '../../configs/database.js'
-import { product } from '../types/products.js'
+import { ProductCreateDto, ProductResponseDto, ProductUpdateDto } from '../types/products.js'
 
-const create = async (reqBody: product) => {
+const create = async (reqBody: ProductCreateDto): Promise<ProductResponseDto> => {
 
   const createEntries = Object.entries(reqBody).filter(([_, v]) => v !== undefined)
 
@@ -19,7 +19,7 @@ const create = async (reqBody: product) => {
   return createdProduct.rows[0]
 }
 
-const findProductById = async (product_id: number) => {
+const findProductById = async (product_id: number): Promise<ProductResponseDto | null> => {
   const result = await pool.query(`
     SELECT product_id, product_name, product_slug, category_id, created_at, updated_at
     FROM products
@@ -27,10 +27,10 @@ const findProductById = async (product_id: number) => {
     `,
     [product_id]
   )
-  return await result.rows[0]
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
-const findProductBySlug = async (product_slug: string) => {
+const findProductBySlug = async (product_slug: string): Promise<ProductResponseDto | null> => {
   const result = await pool.query(`
       SELECT product_id, product_name, product_slug, category_id, created_at, updated_at
       FROM products
@@ -38,11 +38,15 @@ const findProductBySlug = async (product_slug: string) => {
     `,
     [product_slug]
   )
-  return await result.rows[0]
+  return result.rows.length > 0 ? result.rows[0] : null
 }
 
-const update = async (product_id: number, reqBody: product) => {
+const update = async (product_id: number, reqBody: ProductUpdateDto): Promise<ProductResponseDto | null> => {
   const updatedEntries = Object.entries(reqBody).filter(([_, value]) => value !== undefined)
+
+  if (updatedEntries.length === 0) {
+    return null
+  }
 
   const fields = updatedEntries.map(([key], index) => `${key} = $${index + 1}`)
   const value = updatedEntries.map(([_, value]) => value)

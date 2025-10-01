@@ -2,10 +2,10 @@ import { StatusCodes } from 'http-status-codes'
 import ApiError from '../../utils/ApiError.js'
 import { slugify } from '../../utils/formatters.js'
 import { categoryModel } from '../categories/category.model.js'
-import { product } from '../types/products.js'
+import { ProductCreateDto, ProductResponseDto, ProductUpdateDto } from '../types/products.js'
 import { productModel } from './product.model.js'
 
-const createNew = async (reqBody: product) => {
+const createNew = async (reqBody: ProductCreateDto): Promise<ProductResponseDto> => {
   try {
     if (!reqBody.product_name) {
       throw new ApiError(StatusCodes.BAD_REQUEST, 'product_name not to be undefined!')
@@ -33,7 +33,7 @@ const createNew = async (reqBody: product) => {
   }
 }
 
-const getProduct = async (product_id: number) => {
+const getProduct = async (product_id: number): Promise<ProductResponseDto> => {
   try {
     const result = await productModel.findProductById(product_id)
 
@@ -47,21 +47,26 @@ const getProduct = async (product_id: number) => {
   }
 }
 
-const update = async (product_id: number, reqBody: product) => {
+const update = async (product_id: number, reqBody: ProductUpdateDto): Promise<ProductResponseDto | null> => {
   try {
     const existProduct = await productModel.findProductById(product_id)
     if (!existProduct) {
       throw new ApiError(StatusCodes.NOT_FOUND, 'product_id is not exist')
     }
 
-    if (!reqBody.product_name) {
-      throw new ApiError(StatusCodes.BAD_REQUEST, 'product_name not to be undefined!')
+    if (reqBody.category_id) {
+      const existCategory = await categoryModel.findCategoryById(reqBody.category_id)
+      if (!existCategory) {
+        throw new ApiError(StatusCodes.CONFLICT, 'This category is not exist')
+      }
     }
-    reqBody.product_slug = slugify(reqBody.product_name)
 
-    const existProduct2 = await productModel.findProductBySlug(reqBody.product_slug)
-    if (existProduct2) {
-      throw new ApiError(StatusCodes.NOT_FOUND, 'This name already exist')
+    if (reqBody.product_name) {
+      reqBody.product_slug = slugify(reqBody.product_name)
+      const existProduct2 = await productModel.findProductBySlug(reqBody.product_slug)
+      if (existProduct2) {
+        throw new ApiError(StatusCodes.NOT_FOUND, 'This name already exist')
+      }
     }
 
     const updatedProduct = await productModel.update(product_id, reqBody)

@@ -8,5 +8,6 @@ Router.route('/create').post(productItemValidation.createNew, productItemControl
 
 Router.route('/:product_item_id')
   .get(productItemController.getProductItem)
+  .put(productItemController.update)
 
 export const productItemRoute = Router
